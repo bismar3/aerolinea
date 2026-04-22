@@ -4,13 +4,14 @@ type Pagina =
   | 'dashboard'
   | 'usuarios' | 'roles' | 'permisos'
   | 'aeropuertos' | 'rutas' | 'programacion'
-  | 'reservas' | 'pagos';
+  | 'reservas' | 'pagos' | 'reportes';
 
 interface MenuItem {
   id: Pagina;
   label: string;
   icono: string;
   permiso: string;
+  grupo: string;
 }
 
 interface SidebarProps {
@@ -21,76 +22,102 @@ interface SidebarProps {
 }
 
 const menuItems: MenuItem[] = [
-  { id: 'usuarios',     label: 'Usuarios',      icono: '👤', permiso: 'Usuarios' },
-  { id: 'roles',        label: 'Roles',          icono: '🔑', permiso: 'Roles' },
-  { id: 'permisos',     label: 'Permisos',       icono: '🛡️', permiso: 'Permisos' },
-  { id: 'aeropuertos',  label: 'Aeropuertos',    icono: '🏢', permiso: 'Vuelos' },
-  { id: 'rutas',        label: 'Rutas',          icono: '✈️', permiso: 'Vuelos' },
-  { id: 'programacion', label: 'Programación',   icono: '📅', permiso: 'Vuelos' },
-  { id: 'reservas',     label: 'Reservas',       icono: '🎫', permiso: 'Reservas' },
-  { id: 'pagos',        label: 'Pagos',          icono: '💳', permiso: 'Pagos' },
+  { id: 'usuarios',     label: 'Usuarios',    icono: '👤', permiso: 'Seguridad', grupo: 'Seguridad' },
+  { id: 'roles',        label: 'Roles',        icono: '🔑', permiso: 'Seguridad', grupo: 'Seguridad' },
+  { id: 'permisos',     label: 'Permisos',     icono: '🛡️', permiso: 'Seguridad', grupo: 'Seguridad' },
+  { id: 'aeropuertos',  label: 'Aeropuertos',  icono: '🏢', permiso: 'Vuelos',    grupo: 'Vuelos' },
+  { id: 'rutas',        label: 'Rutas',         icono: '🗺️', permiso: 'Vuelos',    grupo: 'Vuelos' },
+  { id: 'programacion', label: 'Programación', icono: '📅', permiso: 'Vuelos',    grupo: 'Vuelos' },
+  { id: 'reservas',     label: 'Reservas',     icono: '🎫', permiso: 'Reservas',  grupo: 'Reservas' },
+  { id: 'pagos',        label: 'Pagos',         icono: '💳', permiso: 'Pagos',     grupo: 'Pagos' },
+  { id: 'reportes',     label: 'Reportes',     icono: '📊', permiso: 'Reportes',  grupo: 'Reportes' },
 ];
 
+const grupoIconos: Record<string, string> = {
+  Seguridad: '🔒',
+  Vuelos: '✈️',
+  Reservas: '🎫',
+  Pagos: '💳',
+  Reportes: '📊',
+};
+
 const Sidebar = ({ paginaActual, permisos, onNavegar, onCerrarSesion }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [grupoAbierto, setGrupoAbierto] = useState<string | null>(null);
 
   const itemsVisibles = menuItems.filter(item =>
     permisos.includes(item.permiso)
   );
 
+  const gruposVisibles = ['Seguridad', 'Vuelos', 'Reservas', 'Pagos', 'Reportes'].filter(grupo =>
+    itemsVisibles.some(item => item.grupo === grupo)
+  );
+
+  const toggleGrupo = (grupo: string) => {
+    setGrupoAbierto(prev => prev === grupo ? null : grupo);
+  };
+
   return (
-    <div className={`h-screen bg-slate-900 text-white flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <div className="w-full bg-slate-900 text-white">
+      {/* Barra principal */}
+      <div className="flex items-center px-4 py-2 border-b border-slate-700">
+        {/* Logo */}
+        <span className="text-lg font-bold tracking-wide mr-6">✈️ BOA</span>
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-slate-700">
-        {!collapsed && (
-          <span className="text-lg font-bold tracking-wide">✈️ BOA</span>
-        )}
+        {/* Dashboard */}
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-slate-400 hover:text-white transition"
+          onClick={() => { onNavegar('dashboard'); setGrupoAbierto(null); }}
+          className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition hover:bg-slate-700 mr-1
+            ${paginaActual === 'dashboard' ? 'bg-slate-700 font-semibold' : ''}`}
         >
-          {collapsed ? '→' : '←'}
-        </button>
-      </div>
-
-      {/* Menu */}
-      <nav className="flex-1 py-4">
-        {/* Dashboard siempre visible */}
-        <button
-          onClick={() => onNavegar('dashboard')}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-700
-            ${paginaActual === 'dashboard' ? 'bg-slate-700 border-r-4 border-white font-semibold' : ''}
-          `}
-        >
-          <span className="text-xl">🏠</span>
-          {!collapsed && <span>Dashboard</span>}
+          🏠 Dashboard
         </button>
 
-        {/* Items según permisos */}
-        {itemsVisibles.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onNavegar(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-700
-              ${paginaActual === item.id ? 'bg-slate-700 border-r-4 border-white font-semibold' : ''}
-            `}
-          >
-            <span className="text-xl">{item.icono}</span>
-            {!collapsed && <span>{item.label}</span>}
-          </button>
+        {/* Grupos */}
+        {gruposVisibles.map((grupo) => (
+          <div key={grupo} className="relative">
+            <button
+              onClick={() => toggleGrupo(grupo)}
+              className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition hover:bg-slate-700 mr-1
+                ${grupoAbierto === grupo ? 'bg-slate-700 font-semibold' : ''}`}
+            >
+              <span>{grupoIconos[grupo]}</span>
+              <span>{grupo}</span>
+              <span className="text-slate-400 text-xs ml-1">
+                {grupoAbierto === grupo ? '▲' : '▼'}
+              </span>
+            </button>
+
+            {/* Dropdown items */}
+            {grupoAbierto === grupo && (
+              <div className="absolute top-full left-0 bg-slate-800 rounded-lg shadow-lg py-1 z-50 min-w-36">
+                {itemsVisibles
+                  .filter(item => item.grupo === grupo)
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => { onNavegar(item.id); setGrupoAbierto(null); }}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition hover:bg-slate-700
+                        ${paginaActual === item.id ? 'bg-slate-700 font-semibold' : ''}`}
+                    >
+                      <span>{item.icono}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  ))
+                }
+              </div>
+            )}
+          </div>
         ))}
-      </nav>
 
-      {/* Cerrar sesión */}
-      <div className="border-t border-slate-700 p-4">
-        <button
-          onClick={onCerrarSesion}
-          className="w-full flex items-center gap-3 px-2 py-2 text-sm text-slate-400 hover:text-white transition"
-        >
-          <span className="text-xl">🚪</span>
-          {!collapsed && <span>Cerrar Sesión</span>}
-        </button>
+        {/* Cerrar sesión */}
+        <div className="ml-auto">
+          <button
+            onClick={onCerrarSesion}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white transition"
+          >
+            🚪 Cerrar Sesión
+          </button>
+        </div>
       </div>
     </div>
   );

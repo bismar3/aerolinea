@@ -59,9 +59,11 @@ export const GET_ROL_PERMISO_USUARIOS = gql`
       rolPermiso {
         id
         rol {
+          id
           nombre
         }
         permiso {
+          id
           nombre
         }
       }
