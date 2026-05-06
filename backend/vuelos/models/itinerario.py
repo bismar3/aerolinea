@@ -1,18 +1,31 @@
 from django.db import models
-from .ruta import Ruta
+from .programacion_vuelo import ProgramacionVuelo
+
 
 class Itinerario(models.Model):
-    fecha = models.DateField()
-    fecha_salida = models.DateTimeField()
-    fecha_llegada = models.DateTimeField()
-    duracion_total = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    estado = models.CharField(max_length=20, default='programado')
-    tipo = models.CharField(max_length=50, blank=True, default='')
-    observaciones = models.CharField(max_length=500, blank=True, default='')
-    id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, related_name='itinerarios')
+    TIPO_CHOICES = [
+        ('directo',    'Directo'),
+        ('con_escala', 'Con Escala'),
+    ]
 
-    def __str__(self):
-        return f"Itinerario {self.id} - {self.fecha}"
+    id_itinerario  = models.AutoField(primary_key=True)
+    id_programacion = models.ForeignKey(
+                          ProgramacionVuelo,
+                          on_delete=models.CASCADE,
+                          db_column='id_programacion',
+                          related_name='itinerarios'
+                      )
+    fecha_salida   = models.DateField()
+    fecha_llegada  = models.DateField()
+    duracion_total = models.IntegerField(default=0)  # minutos
+    tipo           = models.CharField(max_length=20, choices=TIPO_CHOICES, default='directo')
+    estado         = models.CharField(max_length=20, default='activo')
+    observaciones  = models.TextField(blank=True, null=True)
 
     class Meta:
-        db_table = 'itinerario'
+        db_table    = 'itinerario'
+        verbose_name = 'Itinerario'
+        ordering    = ['fecha_salida']
+
+    def __str__(self):
+        return f"Itinerario {self.id_itinerario} - {self.id_programacion.codigo_vuelo}"

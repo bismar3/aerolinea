@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-pmr*lkk)$!8o&_=nlf)d*8m^k_%o_%-prow3r!q!6t8g#jwicb'
+SECRET_KEY = 'django-insecure-boa-aerolinea-2026-secret-key-change-in-production'
 
 DEBUG = True
 
@@ -19,10 +19,13 @@ INSTALLED_APPS = [
     'graphene_django',
     'corsheaders',
     # Propias
-    'seguridad',
-    'vuelos',
+    'usuarios',
+    'vuelos.apps.VuelosConfig',
     'reservas',
-    'pagos',
+    'salida',
+    'finanzas',
+    'reportes',
+    'notificaciones',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +61,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'boa-aerolinea',
+        'NAME': 'boa_backend',
         'USER': 'postgres',
         'PASSWORD': '60029635',
         'HOST': 'localhost',
@@ -81,12 +84,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-# GraphQL
 GRAPHENE = {
     'SCHEMA': 'config.schema.schema'
 }

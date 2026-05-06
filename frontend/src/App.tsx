@@ -1,36 +1,56 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './modules/seguridad/pages/LoginPage';
+import LoginPage from './modules/usuarios/pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import UsuariosPage from './modules/seguridad/pages/UsuariosPage';
-import RolesPage from './modules/seguridad/pages/RolesPage';
-import PermisosPage from './modules/seguridad/pages/PermisosPage';
+import UsuariosPage from './modules/usuarios/pages/UsuariosPage';
+import RolesPage from './modules/usuarios/pages/RolesPage';
+import PermisosPage from './modules/usuarios/pages/PermisosPage';
 import AeropuertosPage from './modules/vuelos/pages/AeropuertosPage';
+import AeronavesPge from './modules/vuelos/pages/AeronavesPge';
+import RutasPage from './modules/vuelos/pages/RutasPage';
+import EscalasPage from './modules/vuelos/pages/EscalasPage';
+import ProgramacionPage from './modules/vuelos/pages/ProgramacionPage';
+import ClientesPage from './modules/reservas/pages/ClientesPage';
+import ReservasPage from './modules/reservas/pages/ReservasPage';
+import TicketsPage from './modules/reservas/pages/TicketsPage';
+import ConsultarAsientosPage from './modules/reservas/pages/ConsultarAsientosPage';
 import Sidebar from './components/Sidebar';
+import SalidasPage from './modules/salida/pages/SalidasPage';
+import DevolucionesPage from './modules/salida/pages/DevolucionesPage';
+import IngresosPage from './modules/finanzas/pages/IngresosPage';
+import EgresosPage from './modules/finanzas/pages/EgresosPage';
+import TripulacionPage from './modules/vuelos/pages/TripulacionPage';
+import ReprogramacionPage from './modules/vuelos/pages/ReprogramacionPage';
+import ItinerarioPage from './modules/vuelos/pages/ItinerarioPage';
 
 // ── Tipos ──────────────────────────────────────────
 type Paso = 'login' | 'app' | 'pasajero';
 type Pagina =
   | 'dashboard'
   | 'usuarios' | 'roles' | 'permisos'
-  | 'aeropuertos' | 'rutas' | 'programacion'
-  | 'reservas' | 'pagos' | 'reportes';
+  | 'aeropuertos' | 'aeronaves' | 'rutas' | 'escalas' | 'itinerario' | 'programacion' | 'tripulacion' | 'reprogramacion'
+  | 'clientes' | 'tipo_clases' | 'reservas' | 'tickets'
+  | 'salidas' | 'devoluciones'
+  | 'ingresos' | 'egresos'
+  | 'reportes';
 
 interface Usuario {
-  id: string;
-  userName: string;
-  correoElectronico: string;
+  idUsuario: string;
+  nombreCompleto: string;
+  username: string;
+  correo: string;
   estado: string;
+  idRol: { idRol: string; nombre: string } | null;
 }
 
 interface Pasajero {
-  id: string;
+  idPasajero: string;
   nombre: string;
   apellidoPaterno: string;
-  correoElectronico: string;
+  correo: string;
 }
 
-// ── Layout trabajador ──────────────────────────────
+// ── Layout ─────────────────────────────────────────
 interface LayoutProps {
   paginaActual: Pagina;
   permisos: string[];
@@ -60,45 +80,46 @@ const PortalPasajero = ({ pasajero, onCerrarSesion }: { pasajero: Pasajero; onCe
       <div className="bg-white rounded-xl shadow p-6 mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
-            ✈️ Bienvenido, {pasajero.nombre} {pasajero.apellidoPaterno}
+            Bienvenido, {pasajero.nombre} {pasajero.apellidoPaterno}
           </h1>
           <p className="text-slate-500 text-sm mt-1">Portal del Pasajero — BOA</p>
         </div>
-        <button
-          onClick={onCerrarSesion}
-          className="border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-semibold transition"
-        >
-          🚪 Cerrar Sesión
+        <button onClick={onCerrarSesion}
+          className="border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-semibold transition">
+          Cerrar Sesión
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md transition">
-          <h2 className="text-lg font-semibold text-slate-800 mb-2">🗓️ Ver Itinerarios</h2>
-          <p className="text-slate-500 text-sm">Consulta vuelos disponibles</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md transition">
-          <h2 className="text-lg font-semibold text-slate-800 mb-2">🎫 Mis Reservas</h2>
-          <p className="text-slate-500 text-sm">Ver y gestionar tus reservas</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md transition">
-          <h2 className="text-lg font-semibold text-slate-800 mb-2">💳 Mis Pagos</h2>
-          <p className="text-slate-500 text-sm">Historial de pagos realizados</p>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md transition">
-          <h2 className="text-lg font-semibold text-slate-800 mb-2">👤 Mi Perfil</h2>
-          <p className="text-slate-500 text-sm">Editar mis datos personales</p>
-        </div>
+        {[
+          { titulo: 'Ver Itinerarios',  desc: 'Consulta vuelos disponibles' },
+          { titulo: 'Mis Reservas',     desc: 'Ver y gestionar tus reservas' },
+          { titulo: 'Mis Pagos',        desc: 'Historial de pagos realizados' },
+          { titulo: 'Mi Perfil',        desc: 'Editar mis datos personales' },
+        ].map(item => (
+          <div key={item.titulo} className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md transition">
+            <h2 className="text-lg font-semibold text-slate-800 mb-2">{item.titulo}</h2>
+            <p className="text-slate-500 text-sm">{item.desc}</p>
+          </div>
+        ))}
       </div>
     </div>
   </div>
 );
 
+// ── Página pendiente ───────────────────────────────
+const Pendiente = ({ titulo }: { titulo: string }) => (
+  <div className="p-6">
+    <h1 className="text-2xl font-bold text-slate-800">{titulo}</h1>
+    <p className="text-slate-500 text-sm mt-1">Próximamente...</p>
+  </div>
+);
+
 // ── App ────────────────────────────────────────────
 const App = () => {
-  const [paso, setPaso] = useState<Paso>('login');
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [pasajero, setPasajero] = useState<Pasajero | null>(null);
-  const [permisos, setPermisos] = useState<string[]>([]);
+  const [paso, setPaso]                 = useState<Paso>('login');
+  const [usuario, setUsuario]           = useState<Usuario | null>(null);
+  const [pasajero, setPasajero]         = useState<Pasajero | null>(null);
+  const [permisos, setPermisos]         = useState<string[]>([]);
   const [paginaActual, setPaginaActual] = useState<Pagina>('dashboard');
 
   const handleLoginTrabajadorExitoso = (usuarioData: Usuario, permisosData: string[]) => {
@@ -120,23 +141,36 @@ const App = () => {
     setPaso('login');
   };
 
-  const handleNavegar = (pagina: Pagina) => {
-    setPaginaActual(pagina);
-  };
-
   const renderPagina = () => {
     switch (paginaActual) {
-      case 'dashboard':    return <DashboardPage usuario={usuario} permisos={permisos} />;
-      case 'usuarios':     return <UsuariosPage />;
-      case 'roles':        return <RolesPage />;
-      case 'permisos':     return <PermisosPage />;
-      case 'aeropuertos':  return <AeropuertosPage />;
-      case 'rutas':        return <div className="p-6"><h1 className="text-2xl font-bold text-slate-800">🗺️ Rutas</h1><p className="text-slate-500 text-sm mt-1">Próximamente...</p></div>;
-      case 'programacion': return <div className="p-6"><h1 className="text-2xl font-bold text-slate-800">📅 Programación</h1><p className="text-slate-500 text-sm mt-1">Próximamente...</p></div>;
-      case 'reservas':     return <div className="p-6"><h1 className="text-2xl font-bold text-slate-800">🎫 Reservas</h1><p className="text-slate-500 text-sm mt-1">Próximamente...</p></div>;
-      case 'pagos':        return <div className="p-6"><h1 className="text-2xl font-bold text-slate-800">💳 Pagos</h1><p className="text-slate-500 text-sm mt-1">Próximamente...</p></div>;
-      case 'reportes':     return <div className="p-6"><h1 className="text-2xl font-bold text-slate-800">📊 Reportes</h1><p className="text-slate-500 text-sm mt-1">Próximamente...</p></div>;
-      default:             return <DashboardPage usuario={usuario} permisos={permisos} />;
+      case 'dashboard':      return <DashboardPage usuario={usuario} permisos={permisos} />;
+      // Gestión de Usuarios
+      case 'usuarios':       return <UsuariosPage />;
+      case 'roles':          return <RolesPage />;
+      case 'permisos':       return <PermisosPage />;
+      // Programación de Vuelos
+      case 'aeropuertos':    return <AeropuertosPage />;
+      case 'aeronaves':      return <AeronavesPge />;
+      case 'rutas':          return <RutasPage />;
+      case 'escalas':        return <EscalasPage />;
+      case 'programacion':   return <ProgramacionPage />;
+      case 'itinerario':     return <ItinerarioPage />;
+      case 'tripulacion':    return <TripulacionPage />;
+      case 'reprogramacion': return <ReprogramacionPage />;
+      // Reservas de Pasajes
+case 'clientes':    return <ClientesPage />;
+case 'tipo_clases': return <ConsultarAsientosPage />;
+case 'tickets':     return <TicketsPage />;
+case 'reservas':    return <ReservasPage onNavegar={setPaginaActual} />;
+      // Salidas
+      case 'salidas':        return <SalidasPage />;
+      case 'devoluciones':   return <DevolucionesPage />;
+      // Finanzas
+      case 'ingresos':       return <IngresosPage />;
+      case 'egresos':        return <EgresosPage />;
+      // Reportes
+      case 'reportes':       return <Pendiente titulo="Reportes" />;
+      default:               return <DashboardPage usuario={usuario} permisos={permisos} />;
     }
   };
 
@@ -160,7 +194,7 @@ const App = () => {
               <Layout
                 paginaActual={paginaActual}
                 permisos={permisos}
-                onNavegar={handleNavegar}
+                onNavegar={setPaginaActual}
                 onCerrarSesion={handleCerrarSesion}
               >
                 {renderPagina()}
